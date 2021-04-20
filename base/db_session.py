@@ -1,8 +1,7 @@
 import sqlalchemy as sa
+import sqlalchemy.orm as orm
 from sqlalchemy.orm import Session
 import sqlalchemy.ext.declarative as dec
-
-import app.store.models
 
 SqlAlchemyBase = dec.declarative_base()
 
@@ -22,7 +21,9 @@ def global_init(db_file):
     print(f"Setting database connection to  {conn_str}...")
     try:
         engine = sa.create_engine(conn_str, echo=False)
-        __factory = app.store.models.orm.sessionmaker(bind=engine)
+        __factory = orm.sessionmaker(bind=engine)
+
+        from base import __all_models
 
         SqlAlchemyBase.metadata.create_all(engine)
     except Exception as e:

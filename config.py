@@ -1,5 +1,4 @@
-import os
-from json import load
+from datetime import timedelta
 
 
 class Config(object):
@@ -14,6 +13,7 @@ class Config(object):
     # данных, например cookies.
     SECRET_KEY = "Ru61wvvhsjm0mxBP"
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    PERMANENT_SESSION_LIFETIME = timedelta(days=365)
 
 
 class ProductionConfig(Config):
