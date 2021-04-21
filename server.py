@@ -26,7 +26,6 @@ if __name__ == '__main__':
     admin.set_password("<j;t_[hfyb_vjq_cfqn!")
     admin.is_admin = True
     db_session = create_session()
-    print(db_session.query(User).filter_by(login="admin").first())
     if db_session.query(User).filter_by(login="admin").first() is None:
         db_session.add(admin)
         db_session.commit()
