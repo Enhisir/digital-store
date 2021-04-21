@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import os
 from flask import Flask
 from flask_login import LoginManager
 
@@ -30,4 +31,6 @@ if __name__ == '__main__':
         db_session.add(admin)
         db_session.commit()
     app.register_blueprint(store_blueprint)
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port, debug=True)
+
