@@ -82,3 +82,19 @@ def login():
 def logout():
     logout_user()
     return redirect("/")
+
+
+def admin_required(func):
+    def function_decorator(*args, **kwargs):
+        if current_user.is_admin:
+            return func(*args, **kwargs)
+        else:
+            return not_allowed()
+    return function_decorator
+
+
+@store_blueprint.route("/admin/products/add", methods=['GET', 'POST'])
+@admin_required
+@login_required
+def add_product():
+    return jsonify({"nice": True})

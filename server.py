@@ -15,11 +15,19 @@ login_manager.init_app(app)
 
 @login_manager.user_loader
 def load_user(user_id):
-    local_db_session = create_session()
-    return local_db_session.query(User).get(user_id)
+    db_session = create_session()
+    return db_session.query(User).get(user_id)
 
 
 if __name__ == '__main__':
     db_global_init("db/vault.db")
+    admin = User(login="admin", email="enhisir@yandex.ru")
+    admin.set_password("<j;t_[hfyb_vjq_cfqn!")
+    admin.is_admin = True
+    db_session = create_session()
+    print(db_session.query(User).filter_by(login="admin").first())
+    if db_session.query(User).filter_by(login="admin").first() is None:
+        db_session.add(admin)
+        db_session.commit()
     app.register_blueprint(store_blueprint)
     app.run(debug=True)
