@@ -26,7 +26,7 @@ if __name__ == '__main__':
     admin.set_password("<j;t_[hfyb_vjq_cfqn!")
     admin.is_admin = True
     db_session = create_session()
-    if db_session.query(User).filter_by(login="admin").first() is None:
+    if db_session.query(User).filter_by(login="admin").one() is None:
         db_session.add(admin)
         db_session.commit()
     app.register_blueprint(store_blueprint)

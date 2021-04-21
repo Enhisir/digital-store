@@ -20,7 +20,7 @@ def global_init(db_file):
     conn_str = f'sqlite:///{db_file.strip()}?check_same_thread=False'
     print(f"Setting database connection to  {conn_str}...")
     try:
-        engine = sa.create_engine(conn_str, echo=False)
+        engine = sa.create_engine(conn_str, echo=False, pool_pre_ping=True)
         __factory = orm.sessionmaker(bind=engine)
 
         from base import __all_models

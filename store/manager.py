@@ -51,7 +51,7 @@ def register():
             user.set_password(form.password.data)
             local_db_session.add(user)
             local_db_session.commit()
-            user = local_db_session.query(User).filter_by(login=user.login).first()
+            user = local_db_session.query(User).filter_by(login=user.login).one()
             login_user(user, remember=False)
             return redirect('/')
     return render_template("store/register.html", **data)
@@ -69,7 +69,7 @@ def login():
     }
 
     if form.validate_on_submit():
-        user = local_db_session.query(User).filter_by(login=form.login.data).first()
+        user = local_db_session.query(User).filter_by(login=form.login.data).one()
         if user and user.check_password(form.password.data):
             login_user(user, remember=form.remember_me.data)
             return redirect("/")
