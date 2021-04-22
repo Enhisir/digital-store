@@ -4,21 +4,10 @@ from base.db_session import SqlAlchemyBase
 from sqlalchemy import orm, Column, Integer, String, ForeignKey
 
 
-class Key(SqlAlchemyBase, SerializerMixin):
-    __tablename__ = "keys"
+class Item(SqlAlchemyBase, SerializerMixin):
+    __tablename__ = "items"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    product_id = Column(Integer, ForeignKey("product_keys.id"))
+    product_id = Column(Integer, ForeignKey("products.id"))
     value = Column(String, nullable=False)
-    product = orm.relation("ProductKey")
-
-
-# class Account(SqlAlchemyBase, SerializerMixin):
-#     __tablename__ = "accounts"
-#
-#     id = Column(Integer, primary_key=True, autoincrement=True)
-#     product_id = Column(Integer,
-#                                    ForeignKey("products.id"))
-#     login = Column(String, nullable=False)
-#     password = Column(String, nullable=False)
-#     additional = Column(String, nullable=True)
+    product = orm.relation("Product")

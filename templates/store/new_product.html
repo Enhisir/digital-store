@@ -1,0 +1,56 @@
+{% extends "store/base.html" %}
+
+{% block content %}
+<div class="form-container">
+    <h1>Новый товар</h1>
+    <form action="" method="post" enctype="multipart/form-data">
+        {{ form.hidden_tag() }}
+        <p>
+            {{ form.picture.label }}<br>
+            {{ form.picture(class="form-control-file", type="file") }}<br>
+            {% for error in form.picture.errors %}
+                <p class="alert alert-danger" role="alert">
+                    {{ error }}
+                </p>
+            {% endfor %}
+        </p>
+        <p>
+            {{ form.product_name.label }}<br>
+            {{ form.product_name(class="form-control", type="text") }}<br>
+            {% for error in form.product_name.errors %}
+                <p class="alert alert-danger" role="alert">
+                    {{ error }}
+                </p>
+            {% endfor %}
+        </p>
+        <p>
+            {{ form.price.label }}<br>
+            {{ form.price(class="form-control", type="price") }}<br>
+            {% for error in form.price.errors %}
+                <p class="alert alert-danger" role="alert">
+                    {{ error }}
+                </p>
+            {% endfor %}
+        </p>
+        <p>
+            {{ form.product_desc.label }}<br>
+            {{ form.product_desc(class="form-control", type="price") }}<br>
+            {% for error in form.product_desc.errors %}
+                <p class="alert alert-danger" role="alert">
+                    {{ error }}
+                </p>
+            {% endfor %}
+        </p>
+        <p>
+            {{ form.alert.label }}<br>
+            {{ form.alert(class="form-control", type="price") }}<br>
+            {% for error in form.alert.errors %}
+                <p class="alert alert-danger" role="alert">
+                    {{ error }}
+                </p>
+            {% endfor %}
+        </p>
+        <p>{{ form.submit(type="submit", class="btn btn-primary") }}</p>
+    </form>
+</div>
+{% endblock %}

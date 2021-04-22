@@ -1,9 +1,11 @@
-from flask import render_template, Blueprint, make_response, jsonify
+from flask import request, render_template, Blueprint, make_response, jsonify
 from flask_login import login_user, current_user, login_required, logout_user
 from werkzeug.utils import redirect
 
 from base.db_session import create_session
+from base.products import Product
 from base.users import User
+from store.forms.products import ProductForm
 from store.forms.users import RegisterForm, LoginForm
 
 store_blueprint = Blueprint('store', __name__, template_folder='templates')
@@ -41,17 +43,26 @@ def register():
 
     if form.validate_on_submit():
         if form.password.data != form.password_again.data:
-            data["message"] = "Пароли не совпадают"
+            data["message"] = {
+                "type": "alert alert-danger",
+                "value": "Пароли не совпадают"
+            }
         elif local_db_session.query(User).filter(User.login == form.login.data).first():
-            data["message"] = "Пользователь с таким именем уже есть"
+            data["message"] = {
+                "type": None,
+                "value": "Пользователь с таким именем уже есть"
+            }
         elif local_db_session.query(User).filter(User.login == form.email.data).first():
-            data["message"] = "Пользователь с таким e-mail уже есть"
+            data["message"] = {
+                "type": "alert alert-danger",
+                "value": "Пользователь с таким e-mail уже есть"
+            }
         else:
             user = User(login=form.login.data, email=form.email.data)
             user.set_password(form.password.data)
             local_db_session.add(user)
             local_db_session.commit()
-            user = local_db_session.query(User).filter_by(login=user.login).one()
+            user = local_db_session.query(User).filter_by(login=user.login).first()
             login_user(user, remember=False)
             return redirect('/')
     return render_template("store/register.html", **data)
@@ -69,11 +80,14 @@ def login():
     }
 
     if form.validate_on_submit():
-        user = local_db_session.query(User).filter_by(login=form.login.data).one()
+        user = local_db_session.query(User).filter_by(login=form.login.data).first()
         if user and user.check_password(form.password.data):
             login_user(user, remember=form.remember_me.data)
             return redirect("/")
-        params["message"] = "Неправильный логин или пароль",
+        params["message"] = {
+            "type": "alert alert-danger",
+            "value": "Неправильный логин или пароль"
+        }
     return render_template('store/login.html', **params)
 
 
@@ -89,12 +103,38 @@ def admin_required(func):
         if current_user.is_admin:
             return func(*args, **kwargs)
         else:
-            return not_allowed()
+            return redirect("/")
     return function_decorator
 
 
-@store_blueprint.route("/admin/products/add", methods=['GET', 'POST'])
+@store_blueprint.route("/products/add", methods=['GET', 'POST'])
 @admin_required
 @login_required
 def add_product():
-    return jsonify({"nice": True})
+    db_session = create_session()
+    form = ProductForm()
+
+    data = {
+        "title": "Новый товар",
+        "current_user": current_user,
+        "form": form
+    }
+    print(form.picture.data.read())
+    if form.validate_on_submit():
+        product = Product(
+            picture=form.picture.data.read(),
+            product_name=form.product_name.data,
+            price=form.price.data,
+            product_desc=form.product_desc.data,
+            alert=form.alert.data
+        )
+        db_session.add(product)
+        db_session.commit()
+        # message = {
+        #     "type": "alert alert-info",
+        #     "value": "Новый товар успешно создан!"
+        # }
+        return redirect("/")
+    return render_template("store/new_product.html", **data)
+
+

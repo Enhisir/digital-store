@@ -32,6 +32,9 @@
                     </form>
                     <div>
                         {% if current_user.is_authenticated %}
+                        {%if current_user.is_admin %}
+                        <a class="btn btn-outline-danger me-2" role="button" href="/products/add">Добавить товар</a>
+                        {% endif %}
                         <a class="btn btn-info text-light" role="button" href="/logout">{{ current_user.login }}</a>
                         {% else %}
                         <a class="btn btn-outline-primary me-2" role="button" href="/register">Зарегистрироваться</a>
@@ -42,7 +45,14 @@
             </div>
         </nav>
     </header>
-    {% block content %}
-    {% endblock %}
+    <div class="content" style="margin: 1% 25% 1% 25%; width: 50%">
+        {% if message %}
+            <div class="{{ message['type'] }}" role="alert">
+                {{ message["value"] }}
+            </div>
+        {% endif %}
+        {% block content %}
+        {% endblock %}
+    </div>
 </body>
 </html>
