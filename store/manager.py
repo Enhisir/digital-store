@@ -1,14 +1,16 @@
-from flask import request, render_template, Blueprint, make_response, jsonify
+import base64
+
+from flask import render_template, Blueprint, make_response, jsonify
 from flask_login import login_user, current_user, login_required, logout_user
 from werkzeug.utils import redirect
 
 from base.db_session import create_session
 from base.products import Product
 from base.users import User
-from store.forms.products import ProductForm
+from store.forms.products import AddProductForm, EditProductForm
 from store.forms.users import RegisterForm, LoginForm
 
-store_blueprint = Blueprint('store', __name__, template_folder='templates')
+store_blueprint = Blueprint('store', __name__, template_folder='templates', static_folder="static")
 
 
 @store_blueprint.errorhandler(403)
@@ -23,9 +25,16 @@ def not_found():
 
 @store_blueprint.route('/')
 def index():
+    catalog = [
+        {
+            "image": base64.b64encode(item.picture).decode('utf-8'),
+            "product": item
+        } for item in create_session().query(Product).all()
+    ]
     data = {
         "title": "Главная",
-        "current_user": current_user
+        "current_user": current_user,
+        "products": catalog
     }
     return render_template("store/index.html", **data)
 
@@ -107,34 +116,86 @@ def admin_required(func):
     return function_decorator
 
 
-@store_blueprint.route("/products/add", methods=['GET', 'POST'])
+@store_blueprint.route("/products/add", methods=['GET', 'POST'], endpoint="add_product")
 @admin_required
 @login_required
 def add_product():
     db_session = create_session()
-    form = ProductForm()
+    form = AddProductForm()
 
     data = {
         "title": "Новый товар",
         "current_user": current_user,
         "form": form
     }
-    print(form.picture.data.read())
     if form.validate_on_submit():
-        product = Product(
-            picture=form.picture.data.read(),
-            product_name=form.product_name.data,
-            price=form.price.data,
-            product_desc=form.product_desc.data,
-            alert=form.alert.data
-        )
-        db_session.add(product)
-        db_session.commit()
-        # message = {
-        #     "type": "alert alert-info",
-        #     "value": "Новый товар успешно создан!"
-        # }
-        return redirect("/")
+        if form.picture.data is None:
+            data["message"] = {
+                "type": "alert alert-danger",
+                "value": "Нет картинки"
+            }
+        else:
+            product = Product(
+                picture=form.picture.data.read(),
+                product_name=form.product_name.data,
+                price=form.price.data,
+                product_desc=form.product_desc.data,
+                alert=form.alert.data
+            )
+            db_session.add(product)
+            db_session.commit()
+            data["message"] = {
+                 "type": "alert alert-info",
+                 "value": "Новый товар успешно создан!"
+            }
     return render_template("store/new_product.html", **data)
 
 
+@store_blueprint.route("/products/edit/<int:pid>", methods=['GET', 'POST'], endpoint="edit_product")
+@admin_required
+@login_required
+def edit_product(pid: int):
+    db_session = create_session()
+    form = EditProductForm()
+    product = db_session.query(Product).get(pid)
+    if product is None:
+        return not_found()
+    data = {
+        "title": "Новый товар",
+        "current_user": current_user,
+        "form": form,
+        "product_name": product.product_name,
+        "picture": base64.b64encode(product.picture).decode('utf-8')
+    }
+    if form.validate_on_submit():
+        if form.picture.data:
+            product.picture = form.picture.data.read()
+        product.price = form.price.data
+        product.product_desc = form.product_desc.data
+        product.alert = form.alert.data
+        db_session.commit()
+        data["message"] = {
+            "type": "alert alert-info",
+            "value": "Товар успешно изменен!"
+        }
+        data["picture"] = base64.b64encode(product.picture).decode('utf-8')
+        return render_template("store/edit_product.html", **data)
+
+    else:
+        form.price.data = product.price
+        form.product_desc.data = product.product_desc
+        form.alert.data = product.alert
+        return render_template("store/edit_product.html", **data)
+
+
+@store_blueprint.route("/products/delete/<int:pid>", methods=['GET', 'POST'], endpoint="delete_product")
+@admin_required
+@login_required
+def delete_product(pid: int):
+    db_session = create_session()
+    product = db_session.query(Product).get(pid)
+    if product is None:
+        return not_found()
+    db_session.delete(product)
+    db_session.commit()
+    return redirect("/")
