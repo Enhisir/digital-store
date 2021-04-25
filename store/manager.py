@@ -2,8 +2,7 @@ import os
 
 from flask import render_template, Blueprint, make_response, jsonify
 from flask_login import login_user, current_user, login_required, logout_user
-import werkzeug
-from werkzeug.utils import redirect
+from werkzeug.utils import redirect, secure_filename
 
 from config import Config
 from base.db_session import create_session
@@ -131,10 +130,10 @@ def add_product():
                 "value": "Нет картинки"
             }
         else:
-            path = os.path.join(Config.PICTURE_UPLOAD_FOLDER, werkzeug.secure_filename(form.picture.filename))
-            form.picture.save(path)
+            path = os.path.join(Config.PICTURE_UPLOAD_FOLDER, secure_filename(form.picture.data.filename))
+            form.picture.data.save(path)
             product = Product(
-                picture=path,
+                picture=form.picture.data.filename,
                 product_name=form.product_name.data,
                 price=form.price.data,
                 product_desc=form.product_desc.data,
@@ -166,9 +165,9 @@ def edit_product(pid: int):
     }
     if form.validate_on_submit():
         if form.picture.data:
-            path = os.path.join(Config.PICTURE_UPLOAD_FOLDER, werkzeug.secure_filename(form.picture.filename))
-            form.picture.save(path)
-            product.picture = path
+            path = os.path.join(Config.PICTURE_UPLOAD_FOLDER, secure_filename(form.picture.data.filename))
+            form.picture.data.save(path)
+            product.picture = form.picture.data.filename
         product.price = form.price.data
         product.product_desc = form.product_desc.data
         product.alert = form.alert.data
@@ -179,13 +178,13 @@ def edit_product(pid: int):
         }
         return render_template("store/edit_product.html", **data)
     else:
-        # form.price.data = product.price
-        # form.product_desc.data = product.product_desc
-        # form.alert.data = product.alert
+        form.price.data = product.price
+        form.product_desc.data = product.product_desc
+        form.alert.data = product.alert
         return render_template("store/edit_product.html", **data)
 
 
-@store_blueprint.route("/products/delete/<int:pid>", methods=['GET', 'POST'], endpoint="delete_product")
+@store_blueprint.route("/products/delete/<int:pid>", endpoint="delete_product")
 @admin_required
 @login_required
 def delete_product(pid: int):
@@ -196,3 +195,17 @@ def delete_product(pid: int):
     db_session.delete(product)
     db_session.commit()
     return redirect("/")
+
+
+@store_blueprint.route("/products/<int:pid>", endpoint="show_product")
+def show_product(pid: int):
+    db_session = create_session()
+    product = db_session.query(Product).get(pid)
+    if product is None:
+        return not_found()
+    data = {
+        "title": product.product_name,
+        "current_user": current_user,
+        "product": product
+    }
+    return render_template("store/show_product.html", **data)

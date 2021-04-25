@@ -1,0 +1,46 @@
+{% extends "store/base.html" %}
+
+{% block content %}
+<h1>Купить {{ product.product_name }}</h1>
+<div class="row" style="margin-top: 1%">
+  <div class="col">
+    <img src="{{ url_for('static', filename='img/products/' + product.picture) }}"
+         alt="Product image"
+         width="450">
+  </div>
+  <div class="col">
+    <p class="text-muted" align="center"> Продано: {{ product.purchases }} штук</p>
+    <p class="text-muted" align="center"> Наличие: {{ product.amount }} штук</p>
+  </div>
+  <div class="col">
+    <h2 align="center">Цена: {{ product.price }} ₽</h2><br>
+    <div class="d-flex justify-content-center">
+      <div class="container px-4">
+        <div class="row gx-5">
+          <div class="col">
+            <div class="p-3 border bg-light">
+              <a class="btn btn-primary btn-lg" href="/">Купить</a><br>
+            </div>
+          </div>
+          {% if current_user.is_admin %}
+          <div class="col">
+            <div class="p-3 border bg-light">
+              <a class="btn btn-primary btn-sm" href="/">Новый экземпляр</a><br>
+            </div>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<hr>
+<div style="margin-top: 1%">
+  <h3>Описание</h3>
+  <p>{{ product.product_desc }}</p>
+</div>
+<div class="alert alert-danger" style="margin-top: 1%">
+  <h3>Инструкция</h3>
+  <p>{{ product.alert }}</p>
+</div>
+{% endblock %}

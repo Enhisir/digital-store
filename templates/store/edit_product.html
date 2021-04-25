@@ -3,45 +3,45 @@
 {% block content %}
 <div class="form-container">
     <h1>Редактирование товара</h1><br>
-    <h2>{{ product_name }}</h2>
+    <h2>{{ product.product_name }}</h2>
     <div class="row">
         <div class="col">
-            <img src="data:image/png;base64,{{ picture }}"
+            <img src="{{ url_for('static', filename='img/products/' + product.picture) }}"
                  alt="Product image"
                  width="450">
         </div>
         <div class="col">
             <form action="" method="post" enctype="multipart/form-data">
-                  {{ form.hidden_tag() }}
-                  <p>
-                      {{ form.picture.label }}<br>
-                      {{ form.picture(class="form-control-file", type="file") }}<br>
-                      {% for error in form.picture.errors %}
-                      <p class="alert alert-danger" role="alert">{{ error }}</p>
-                      {% endfor %}
-                  </p>
-                  <p>
-                        {{ form.price.label }}<br>
-                        {{ form.price(class="form-control", type="number" value=product.price) }}<br>
-                        {% for error in form.price.errors %}
-                            <p class="alert alert-danger" role="alert">{{ error }}</p>
-                        {% endfor %}
-                  </p>
-                  <p>
-                        {{ form.product_desc.label }}<br>
-                        {{ form.product_desc(class="form-control", type="text" value=product.product_desc) }}<br>
-                        {% for error in form.product_desc.errors %}
-                            <p class="alert alert-danger" role="alert">{{ error }}</p>
-                        {% endfor %}
-                  </p>
-                  <p>
-                        {{ form.alert.label }}<br>
-                        {{ form.alert(class="form-control", type="text" value=product.alert) }}<br>
-                        {% for error in form.alert.errors %}
-                        <p class="alert alert-danger" role="alert">{{ error }}</p>
-                        {% endfor %}
-                  </p>
-                  <p>{{ form.submit(type="submit", class="btn btn-primary") }}</p>
+                {{ form.hidden_tag() }}
+                <p>
+                    {{ form.picture.label }}<br>
+                    {{ form.picture(class="form-control-file", type="file") }}<br>
+                    {% for error in form.picture.errors %}
+                <p class="alert alert-danger" role="alert">{{ error }}</p>
+                {% endfor %}
+                </p>
+                <p>
+                    {{ form.price.label }}<br>
+                    {{ form.price(class="form-control", type="number") }}<br>
+                    {% for error in form.price.errors %}
+                <p class="alert alert-danger" role="alert">{{ error }}</p>
+                {% endfor %}
+                </p>
+                <p>
+                    {{ form.product_desc.label }}<br>
+                    {{ form.product_desc(class="form-control", type="text") }}<br>
+                    {% for error in form.product_desc.errors %}
+                <p class="alert alert-danger" role="alert">{{ error }}</p>
+                {% endfor %}
+                </p>
+                <p>
+                    {{ form.alert.label }}<br>
+                    {{ form.alert(class="form-control", type="text") }}<br>
+                    {% for error in form.alert.errors %}
+                <p class="alert alert-danger" role="alert">{{ error }}</p>
+                {% endfor %}
+                </p>
+                <p>{{ form.submit(type="submit", class="btn btn-primary") }}</p>
             </form>
         </div>
     </div>
