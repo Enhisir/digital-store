@@ -330,6 +330,7 @@ def delete_item(pid: int, iid: int):
     if item is None:
         return not_found()
     item = db_session.query(Item).get(iid)
+    item.product.amount -= 1
     db_session.delete(item)
     db_session.commit()
     return redirect(f"/products/{product.id}")
