@@ -6,17 +6,17 @@
     <div class="col">
         <div class="card">
             <img class="card-img-top"
-                 src="data:image/png;base64,{{ item['image'] }}"
+                 src="{{ item.picture }}"
                  alt="Product image">
             <div class="card-body">
-                <h5 class="card-title">{{ item["product"].product_name }}</h5>
-                <h6 class="card-subtitle mb-2">{{ item["product"].price }} ₽</h6>
+                <h5 class="card-title">{{ item.product_name }}</h5>
+                <h6 class="card-subtitle mb-2">{{ item.price }} ₽</h6>
             </div>
             <div class="card-footer">
                 <div class="row justify-content-end">
                     {% if current_user.is_admin %}
                     <div class="col-6">
-                        <a href="/products/edit/{{ item['product'].id }}" class="btn btn-primary">Редактировать</a>
+                        <a href="/products/edit/{{ item.id }}" class="btn btn-primary">Редактировать</a>
                     </div>
                     {% else %}
                     <div class="col-6"></div>

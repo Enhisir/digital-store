@@ -8,7 +8,7 @@ class Product(SqlAlchemyBase, SerializerMixin):
     __tablename__ = "products"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    picture = Column(BLOB, nullable=False)
+    picture = Column(String, nullable=False)
     product_name = Column(String, nullable=False)
     price = Column(Integer, nullable=False)
     product_desc = Column(String, nullable=True)

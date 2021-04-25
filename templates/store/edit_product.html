@@ -22,21 +22,21 @@
                   </p>
                   <p>
                         {{ form.price.label }}<br>
-                        {{ form.price(class="form-control", type="price") }}<br>
+                        {{ form.price(class="form-control", type="number" value=product.price) }}<br>
                         {% for error in form.price.errors %}
                             <p class="alert alert-danger" role="alert">{{ error }}</p>
                         {% endfor %}
                   </p>
                   <p>
                         {{ form.product_desc.label }}<br>
-                        {{ form.product_desc(class="form-control", type="price") }}<br>
+                        {{ form.product_desc(class="form-control", type="text" value=product.product_desc) }}<br>
                         {% for error in form.product_desc.errors %}
                             <p class="alert alert-danger" role="alert">{{ error }}</p>
                         {% endfor %}
                   </p>
                   <p>
                         {{ form.alert.label }}<br>
-                        {{ form.alert(class="form-control", type="price") }}<br>
+                        {{ form.alert(class="form-control", type="text" value=product.alert) }}<br>
                         {% for error in form.alert.errors %}
                         <p class="alert alert-danger" role="alert">{{ error }}</p>
                         {% endfor %}

@@ -14,7 +14,7 @@ class Config(object):
     SECRET_KEY = "Ru61wvvhsjm0mxBP"
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     PERMANENT_SESSION_LIFETIME = timedelta(days=365)
-    UPLOAD_FOLDER = "static/img"
+    PICTURE_UPLOAD_FOLDER = "static/img/products"
 
 
 class ProductionConfig(Config):

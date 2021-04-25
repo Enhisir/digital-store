@@ -1,9 +1,11 @@
-import base64
+import os
 
 from flask import render_template, Blueprint, make_response, jsonify
 from flask_login import login_user, current_user, login_required, logout_user
+import werkzeug
 from werkzeug.utils import redirect
 
+from config import Config
 from base.db_session import create_session
 from base.products import Product
 from base.users import User
@@ -25,16 +27,10 @@ def not_found():
 
 @store_blueprint.route('/')
 def index():
-    catalog = [
-        {
-            "image": base64.b64encode(item.picture).decode('utf-8'),
-            "product": item
-        } for item in create_session().query(Product).all()
-    ]
     data = {
         "title": "Главная",
         "current_user": current_user,
-        "products": catalog
+        "products": create_session().query(Product).all()
     }
     return render_template("store/index.html", **data)
 
@@ -135,8 +131,10 @@ def add_product():
                 "value": "Нет картинки"
             }
         else:
+            path = os.path.join(Config.PICTURE_UPLOAD_FOLDER, werkzeug.secure_filename(form.picture.filename))
+            form.picture.save(path)
             product = Product(
-                picture=form.picture.data.read(),
+                picture=path,
                 product_name=form.product_name.data,
                 price=form.price.data,
                 product_desc=form.product_desc.data,
@@ -164,12 +162,13 @@ def edit_product(pid: int):
         "title": "Новый товар",
         "current_user": current_user,
         "form": form,
-        "product_name": product.product_name,
-        "picture": base64.b64encode(product.picture).decode('utf-8')
+        "product": product
     }
     if form.validate_on_submit():
         if form.picture.data:
-            product.picture = form.picture.data.read()
+            path = os.path.join(Config.PICTURE_UPLOAD_FOLDER, werkzeug.secure_filename(form.picture.filename))
+            form.picture.save(path)
+            product.picture = path
         product.price = form.price.data
         product.product_desc = form.product_desc.data
         product.alert = form.alert.data
@@ -178,13 +177,11 @@ def edit_product(pid: int):
             "type": "alert alert-info",
             "value": "Товар успешно изменен!"
         }
-        data["picture"] = base64.b64encode(product.picture).decode('utf-8')
         return render_template("store/edit_product.html", **data)
-
     else:
-        form.price.data = product.price
-        form.product_desc.data = product.product_desc
-        form.alert.data = product.alert
+        # form.price.data = product.price
+        # form.product_desc.data = product.product_desc
+        # form.alert.data = product.alert
         return render_template("store/edit_product.html", **data)
 
 
