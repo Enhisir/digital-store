@@ -46,11 +46,13 @@
         </nav>
     </header>
     <div class="content" style="margin: 1% 25% 1% 25%; width: 50%">
-        {% if message %}
-            <div class="{{ message['type'] }}" role="alert">
-                {{ message["value"] }}
-            </div>
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-info" role="alert">{{ message }}</div>
+        {% endfor %}
         {% endif %}
+        {% endwith %}
         {% block content %}
         {% endblock %}
     </div>

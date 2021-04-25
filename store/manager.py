@@ -1,6 +1,6 @@
 import os
 
-from flask import render_template, Blueprint, make_response, jsonify
+from flask import render_template, Blueprint, make_response, jsonify, flash
 from flask_login import login_user, current_user, login_required, logout_user
 from werkzeug.utils import redirect, secure_filename
 
@@ -48,20 +48,11 @@ def register():
 
     if form.validate_on_submit():
         if form.password.data != form.password_again.data:
-            data["message"] = {
-                "type": "alert alert-danger",
-                "value": "Пароли не совпадают"
-            }
+            flash("Пароли не совпадают")
         elif local_db_session.query(User).filter(User.login == form.login.data).first():
-            data["message"] = {
-                "type": None,
-                "value": "Пользователь с таким именем уже есть"
-            }
+            flash("Пользователь с таким именем уже есть")
         elif local_db_session.query(User).filter(User.login == form.email.data).first():
-            data["message"] = {
-                "type": "alert alert-danger",
-                "value": "Пользователь с таким e-mail уже есть"
-            }
+            flash("Пользователь с таким e-mail уже есть")
         else:
             user = User(login=form.login.data, email=form.email.data)
             user.set_password(form.password.data)
@@ -89,10 +80,7 @@ def login():
         if user and user.check_password(form.password.data):
             login_user(user, remember=form.remember_me.data)
             return redirect("/")
-        params["message"] = {
-            "type": "alert alert-danger",
-            "value": "Неправильный логин или пароль"
-        }
+        flash("Неправильный логин или пароль")
     return render_template('store/login.html', **params)
 
 
@@ -126,10 +114,7 @@ def add_product():
     }
     if form.validate_on_submit():
         if form.picture.data is None:
-            data["message"] = {
-                "type": "alert alert-danger",
-                "value": "Нет картинки"
-            }
+            flash("Нет картинки")
         else:
             path = os.path.join(Config.PICTURE_UPLOAD_FOLDER, secure_filename(form.picture.data.filename))
             form.picture.data.save(path)
@@ -142,45 +127,8 @@ def add_product():
             )
             db_session.add(product)
             db_session.commit()
-            data["message"] = {
-                "type": "alert alert-info",
-                "value": "Новый товар успешно создан!"
-            }
-    return render_template("store/new_product.html", **data)
-
-    db_session = create_session()
-    form = ProductForm()
-
-    data = {
-        "title": "Новый товар",
-        "current_user": current_user,
-        "form": form
-    }
-    if form.validate_on_submit():
-        if form.picture.data is None:
-            data["message"] = {
-                "type": "alert alert-danger",
-                "value": "Нет картинки"
-            }
-        else:
-            path = os.path.join(Config.PICTURE_UPLOAD_FOLDER, secure_filename(form.picture.data.filename))
-            form.picture.data.save(path)
-            product = Product(
-                picture=form.picture.data.filename,
-                product_name=form.product_name.data,
-                price=form.price.data,
-                product_desc=form.product_desc.data,
-                alert=form.alert.data
-            )
-            db_session.add(product)
-            db_session.commit()
-            data["message"] = {
-                 "type": "alert alert-info",
-                 "value": "Новый товар создан!"
-            }
-            data["product"] = product
-            data.pop("form")
-            return render_template("store/show_product.html", **data)
+            flash("Новый товар успешно создан!")
+            redirect("/")
     return render_template("store/new_product.html", **data)
 
 
@@ -208,11 +156,8 @@ def edit_product(pid: int):
         product.product_desc = form.product_desc.data
         product.alert = form.alert.data
         db_session.commit()
-        data["message"] = {
-            "type": "alert alert-info",
-            "value": "Товар успешно изменен!"
-        }
-        return render_template("store/edit_product.html", **data)
+        flash("Товар изменен!")
+        return redirect(f"/products/{product.id}")
     else:
         form.price.data = product.price
         form.product_desc.data = product.product_desc
@@ -230,6 +175,7 @@ def delete_product(pid: int):
         return not_found()
     db_session.delete(product)
     db_session.commit()
+    flash("Товар  удален!")
     return redirect("/")
 
 
@@ -273,12 +219,8 @@ def add_item(pid: int):
         item = db_session.query(Item).filter_by(value=form.value.data).first()
         item.product.amount += 1
         db_session.commit()
-        data["message"] = {
-            "type": "alert alert-info",
-            "value": "Новый экземпляр продукта создан!"
-        }
-        data.pop("form")
-        return render_template("store/show_product.html", **data)
+        flash("Новый экземпляр продукта создан!")
+        return redirect(f"/products/{product.id}")
     return render_template("store/new_item.html", **data)
 
 
@@ -308,12 +250,8 @@ def edit_item(pid: int, iid: int):
             item.binary_value = form.file.data.filename
         item.value = form.value.data
         db_session.commit()
-        data["message"] = {
-            "type": "alert alert-info",
-            "value": "Экземпляр продукта изменен!"
-        }
-        data.pop("form")
-        return render_template("store/show_product.html", **data)
+        flash("Экземпляр продукта именен!")
+        return redirect(f"/products/{product.id}")
     form.value.data = item.value
     return render_template("store/edit_item.html", **data)
 
@@ -333,4 +271,5 @@ def delete_item(pid: int, iid: int):
     item.product.amount -= 1
     db_session.delete(item)
     db_session.commit()
+    flash("Экземпляр продукта удален!")
     return redirect(f"/products/{product.id}")
