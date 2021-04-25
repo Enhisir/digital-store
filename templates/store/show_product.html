@@ -9,8 +9,8 @@
          width="450">
   </div>
   <div class="col">
-    <p class="text-muted" align="center"> Продано: {{ product.purchases }} штук</p>
-    <p class="text-muted" align="center"> Наличие: {{ product.amount }} штук</p>
+    <p class="text-muted" align="center"> Продано: {{ product.purchases }} шт.</p>
+    <p class="text-muted" align="center"> Наличие: {{ product.amount }} шт.</p>
   </div>
   <div class="col">
     <h2 align="center">Цена: {{ product.price }} ₽</h2><br>
@@ -25,7 +25,7 @@
           {% if current_user.is_admin %}
           <div class="col">
             <div class="p-3 border bg-light">
-              <a class="btn btn-primary btn-sm" href="/">Новый экземпляр</a><br>
+              <a class="btn btn-primary btn-sm" href="/products/{{ product.id }}/items/add">Новый экземпляр</a><br>
             </div>
           </div>
           {% endif %}
@@ -39,8 +39,41 @@
   <h3>Описание</h3>
   <p>{{ product.product_desc }}</p>
 </div>
-<div class="alert alert-danger" style="margin-top: 1%">
+<div style="margin-top: 1%">
   <h3>Инструкция</h3>
-  <p>{{ product.alert }}</p>
+  <div class="alert alert-danger">
+    <p>{{ product.alert }}</p>
+  </div>
 </div>
+<hr>
+{% if current_user.is_admin %}
+<div style="margin-top: 1%">
+  <h3>Экземпляры</h3>
+  <table class="table table-striped">
+    <tr>
+      <th class="row">id</th>
+      <td>значение</td>
+      <td>файл</td>
+      <td>изменение</td>
+      <td>удаление</td>
+    </tr>
+    {% for item in product.items %}
+    <tr>
+      <th class="row">{{ item.id }}</th>
+      <td>{{ item.value[:100] }}</td>
+      <td>
+        {% if current_user.is_admin %}
+          {{ item.binary_value }}
+        {% else %} None {% endif %}</td>
+      <td>
+        <a class="btn btn-primary btn-sm" href="/products/{{ product.id }}/items/{{ item.id }}/edit">Изменить</a>
+      </td>
+      <td>
+        <a class="btn btn-primary btn-sm" href="/products/{{ product.id }}/items/{{ item.id }}/delete">Удалить</a>
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+</div>
+{% endif %}
 {% endblock %}

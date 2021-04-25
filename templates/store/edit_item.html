@@ -1,0 +1,32 @@
+{% extends "store/base.html" %}
+
+{% block content %}
+<div class="form-container">
+    <h1>Новый экземпляр товара «{{ product.product_name }}»</h1>
+    <p><a href="{{  url_for('static', filename='uploads/items/' + item.binary_value) }}"
+          class="btn btn-primary bt"
+          download>Текущий файл</a></p>
+    <form action="" method="post" enctype="multipart/form-data">
+        {{ form.hidden_tag() }}
+        <p>
+            {{ form.value.label }}<br>
+            {{ form.value(class="form-control", type="text") }}<br>
+            {% for error in form.value.errors %}
+                <p class="alert alert-danger" role="alert">
+                    {{ error }}
+                </p>
+            {% endfor %}
+        </p>
+        <p>
+            {{ form.file.label }}<br>
+            {{ form.file(class="form-control-file", type="file") }}<br>
+            {% for error in form.file.errors %}
+                <p class="alert alert-danger" role="alert">
+                    {{ error }}
+                </p>
+            {% endfor %}
+        </p>
+        <p>{{ form.submit(type="submit", class="btn btn-primary") }}</p>
+    </form>
+</div>
+{% endblock %}

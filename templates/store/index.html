@@ -7,16 +7,20 @@
         <div class="card">
             <img class="card-img-top"
                  src="{{ url_for('static', filename='img/products/' + item.picture) }}"
-                 alt="Product image">
+                 alt="Product image"
+            style="height: 150px">
             <div class="card-body">
                 <h5 class="card-title">{{ item.product_name }}</h5>
                 <h6 class="card-subtitle mb-2">{{ item.price }} ₽</h6>
             </div>
             <div class="card-footer">
                 {% if current_user.is_admin %}
+                <a href="/products/delete/{{ item.id }}"
+                   style="margin: 1% 1% 1% 1%"
+                   class="btn btn-primary">Удалить</a>
                 <a href="/products/edit/{{ item.id }}"
                    style="margin: 1% 1% 1% 1%"
-                   class="btn btn-primary">Редактировать</a>
+                   class="btn btn-primary">Изменить</a>
                 {% endif %}
                 <a class="btn btn-primary"
                    style="margin: 1% 1% 1% 1%"

@@ -6,11 +6,12 @@ from werkzeug.utils import redirect, secure_filename
 
 from config import Config
 from base.db_session import create_session
+from base.items import Item
 from base.products import Product
 from base.users import User
-from store.forms.products import AddProductForm, EditProductForm
+from store.forms.items import ItemForm
+from store.forms.products import EditProductForm, AddProductForm
 from store.forms.users import RegisterForm, LoginForm
-
 store_blueprint = Blueprint('store', __name__, template_folder='templates', static_folder="static")
 
 
@@ -142,9 +143,44 @@ def add_product():
             db_session.add(product)
             db_session.commit()
             data["message"] = {
-                 "type": "alert alert-info",
-                 "value": "Новый товар успешно создан!"
+                "type": "alert alert-info",
+                "value": "Новый товар успешно создан!"
             }
+    return render_template("store/new_product.html", **data)
+
+    db_session = create_session()
+    form = ProductForm()
+
+    data = {
+        "title": "Новый товар",
+        "current_user": current_user,
+        "form": form
+    }
+    if form.validate_on_submit():
+        if form.picture.data is None:
+            data["message"] = {
+                "type": "alert alert-danger",
+                "value": "Нет картинки"
+            }
+        else:
+            path = os.path.join(Config.PICTURE_UPLOAD_FOLDER, secure_filename(form.picture.data.filename))
+            form.picture.data.save(path)
+            product = Product(
+                picture=form.picture.data.filename,
+                product_name=form.product_name.data,
+                price=form.price.data,
+                product_desc=form.product_desc.data,
+                alert=form.alert.data
+            )
+            db_session.add(product)
+            db_session.commit()
+            data["message"] = {
+                 "type": "alert alert-info",
+                 "value": "Новый товар создан!"
+            }
+            data["product"] = product
+            data.pop("form")
+            return render_template("store/show_product.html", **data)
     return render_template("store/new_product.html", **data)
 
 
@@ -158,7 +194,7 @@ def edit_product(pid: int):
     if product is None:
         return not_found()
     data = {
-        "title": "Новый товар",
+        "title": "Изменить товар",
         "current_user": current_user,
         "form": form,
         "product": product
@@ -209,3 +245,91 @@ def show_product(pid: int):
         "product": product
     }
     return render_template("store/show_product.html", **data)
+
+
+@store_blueprint.route("/products/<int:pid>/items/add", methods=['GET', 'POST'], endpoint="add_item")
+@admin_required
+@login_required
+def add_item(pid: int):
+    db_session = create_session()
+    product = db_session.query(Product).get(pid)
+    if product is None:
+        return not_found()
+    form = ItemForm()
+    data = {
+        "title": "Новый экземпляр",
+        "current_user": current_user,
+        "form": form,
+        "product": product
+    }
+    if form.validate_on_submit():
+        item = Item(product_id=product.id,
+                    value=form.value.data)
+        if form.file.data:
+            path = os.path.join(Config.ITEM_UPLOAD_FOLDER, secure_filename(form.file.data.filename))
+            form.file.data.save(path)
+            item.binary_value = form.file.data.filename
+        db_session.add(item)
+        item = db_session.query(Item).filter_by(value=form.value.data).first()
+        item.product.amount += 1
+        db_session.commit()
+        data["message"] = {
+            "type": "alert alert-info",
+            "value": "Новый экземпляр продукта создан!"
+        }
+        data.pop("form")
+        return render_template("store/show_product.html", **data)
+    return render_template("store/new_item.html", **data)
+
+
+@store_blueprint.route("/products/<int:pid>/items/<int:iid>/edit", methods=['GET', 'POST'], endpoint="edit_item")
+@admin_required
+@login_required
+def edit_item(pid: int, iid: int):
+    db_session = create_session()
+    product = db_session.query(Product).get(pid)
+    if product is None:
+        return not_found()
+    item = db_session.query(Item).get(iid)
+    if item is None:
+        return not_found()
+    form = ItemForm(mode="e")
+    data = {
+        "title": "Новый экземпляр",
+        "current_user": current_user,
+        "form": form,
+        "product": product,
+        "item": item
+    }
+    if form.validate_on_submit():
+        if form.file.data:
+            path = os.path.join(Config.ITEM_UPLOAD_FOLDER, secure_filename(form.file.data.filename))
+            form.file.data.save(path)
+            item.binary_value = form.file.data.filename
+        item.value = form.value.data
+        db_session.commit()
+        data["message"] = {
+            "type": "alert alert-info",
+            "value": "Экземпляр продукта изменен!"
+        }
+        data.pop("form")
+        return render_template("store/show_product.html", **data)
+    form.value.data = item.value
+    return render_template("store/edit_item.html", **data)
+
+
+@store_blueprint.route("/products/<int:pid>/items/<int:iid>/delete", endpoint="delete_item")
+@admin_required
+@login_required
+def delete_item(pid: int, iid: int):
+    db_session = create_session()
+    product = db_session.query(Product).get(pid)
+    if product is None:
+        return not_found()
+    item = db_session.query(Item).get(iid)
+    if item is None:
+        return not_found()
+    item = db_session.query(Item).get(iid)
+    db_session.delete(item)
+    db_session.commit()
+    return redirect(f"/products/{product.id}")

@@ -10,4 +10,5 @@ class Item(SqlAlchemyBase, SerializerMixin):
     id = Column(Integer, primary_key=True, autoincrement=True)
     product_id = Column(Integer, ForeignKey("products.id"))
     value = Column(String, nullable=False)
+    binary_value = Column(String, nullable=True)
     product = orm.relation("Product")

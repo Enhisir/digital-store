@@ -13,7 +13,7 @@ class Product(SqlAlchemyBase, SerializerMixin):
     price = Column(Integer, nullable=False)
     product_desc = Column(String, nullable=True)
     alert = Column(String, nullable=False)
-    amount = Column(String, default=0)
+    amount = Column(Integer, default=0)
     purchases = Column(Integer, default=0)
     creation_date = Column(DateTime, default=datetime.datetime.now)
     items = orm.relation("Item", back_populates="product")

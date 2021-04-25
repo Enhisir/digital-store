@@ -16,7 +16,7 @@ class AddProductForm(FlaskForm):
 
 class EditProductForm(FlaskForm):
     picture = FileField(label="Логотип товара (PNG)",
-                        validators=[FileAllowed(['png'], 'Images only!')])
+                        validators=[FileAllowed(['png', "jpg", "webp"], 'Images only!')])
     price = IntegerField("Цена (в рублях)", validators=[DataRequired()])
     product_desc = TextAreaField("Описание товара")
     alert = TextAreaField("Инструкция", validators=[DataRequired()])

@@ -15,6 +15,7 @@ class Config(object):
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     PERMANENT_SESSION_LIFETIME = timedelta(days=365)
     PICTURE_UPLOAD_FOLDER = "static/img/products"
+    ITEM_UPLOAD_FOLDER = "static/uploads/items"
 
 
 class ProductionConfig(Config):
